@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Index page</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    </head>
+    <body>
+     	<div class="container">
+     		<h2 class="text-info text-center">Persist Training Documents</h2>
+     		<hr/>
+     		<div id="message">
+     			<p class="lead" th:text="${mymsg}"/>
+     		</div>
+     		<div id="welcome">
+     			<p><a href="/upload" class="text-primary">Upload Files</a></p>
+     		</div>
+     	</div>
+    </body>
+</html>

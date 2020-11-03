@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Upload page</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    </head>
+    <body>
+     	<div class="container">
+     		<h2 class="text-info text-center">Persist Training Documents</h2>
+     		<hr/>
+     		<div id="message">
+     			<p class="lead" th:text="${mymsg}"/>
+     		</div>
+     		<div class="col-md-8 mx-auto">
+     			<form method="post" th:action="@{/upload}" enctype="multipart/form-data">
+     				<div class="form-group">
+     					Select Doc : <input type="file" name="file" class="form-control-file" required>
+     					<input type="text" name="description" placeholder="Enter Description">
+     					Email List : <input type="file" name="file" class="form-control-file">
+     				</div>
+     				<button type="submit" class="btn btn-primary">Submit</button>
+     			</form>
+     		</div>     		
+     	</div>
+    </body>
+</html>
