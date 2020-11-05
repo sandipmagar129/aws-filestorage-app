@@ -10,7 +10,7 @@ jobs:
     
     steps:
       - name: Checkout source code
-        uses: actions/checkout@frontend
+        uses: actions/checkout@v2
 
       - name: Cache node modules
         uses: actions/cache@v1
