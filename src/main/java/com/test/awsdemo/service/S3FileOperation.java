@@ -15,11 +15,11 @@ public interface S3FileOperation {
 //	Begin an upload before you know the final object size - You can upload an object as you are creating it.
 //		
 	
-	public void uploadFile(String bucketName, String fileName, MultipartFile file);
-	public void uploadFile(String bucketName, MultipartFile[] file);
-	public void deleteFile(String bucketName, String fileName);
-	public byte[] getFile(String key, String bucketName);
-	public String downloadFile(String key, String bucketName);
+	public boolean uploadFile(String fileName, MultipartFile file);
+	public boolean uploadFile(MultipartFile[] file);
+	public void deleteFile(String fileName);
+	public byte[] downloadFile(String key);
+	public String downloadFileURL(String key);
 	public void copyFile(String srcBucket, String srcFileName,String destBucket,String destFileName);
 
 }

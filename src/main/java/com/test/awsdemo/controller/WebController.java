@@ -1,12 +1,8 @@
 package com.test.awsdemo.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +17,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.amazonaws.services.s3.model.Bucket;
 import com.test.awsdemo.service.S3Bucket;
 import com.test.awsdemo.service.S3FileOperation;
 
 @Controller
 @CrossOrigin(maxAge = 3600)
-public class TestController {
-
-	@Value("${bucket.name}")
-	String bucketName;
+public class WebController {
 
 	@Autowired
 	S3Bucket bucket;
@@ -57,7 +49,7 @@ public class TestController {
 			model.addAttribute("mymsg", "Please select files to upload");
 			return "redirect:/";
 		}
-		fileOperation.uploadFile(bucketName, files);
+		fileOperation.uploadFile(files);
 		String fileName = "";
 		for (MultipartFile file : files) {
 			fileName += file.getOriginalFilename() + " ";
@@ -69,7 +61,7 @@ public class TestController {
 	@GetMapping(path = "/download")
 	public ResponseEntity<byte[]> uploadFile(@RequestParam(value = "file") String file,
 			@RequestParam(value = "bucket") String bName) throws IOException {
-		byte[] data = fileOperation.getFile(file, bName);
+		byte[] data = fileOperation.downloadFile(file);
 
 		if (data == null) {
 			return ResponseEntity.noContent().build();
@@ -82,10 +74,4 @@ public class TestController {
 				// .header("Content-type", "application/octet-stream")
 				.header("Content-disposition", "attachment; filename=\"" + file + "\"").body(resource.getByteArray());
 	}
-
-	@GetMapping(value = "/bucket", produces = { "application/json" })
-	List<Bucket> buckets() {
-		return bucket.getAllBuckets();
-	}
-
 }

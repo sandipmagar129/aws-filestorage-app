@@ -6,6 +6,7 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +43,9 @@ public class S3FileOperationImpl implements S3FileOperation {
 
 	private Logger LOGGER = LoggerFactory.getLogger(S3FileOperationImpl.class);
 
+	@Value("${bucket.name}")
+	String bucketName;
+
 	@Autowired
 	AmazonS3 s3client;
 
@@ -49,7 +53,9 @@ public class S3FileOperationImpl implements S3FileOperation {
 	S3Bucket bucket;
 
 	@Override
-	public void uploadFile(String bucketName, String fileName, MultipartFile file) {
+	public boolean uploadFile(String fileName, MultipartFile file) {
+		boolean flag = false;
+
 		LOGGER.info(" --- Uploading a new file to S3 Bucket --- ");
 
 		if (!s3client.doesBucketExistV2(bucketName))
@@ -72,7 +78,7 @@ public class S3FileOperationImpl implements S3FileOperation {
 			// ProgressListener to your request.
 			request.setGeneralProgressListener(new ProgressListener() {
 				public void progressChanged(ProgressEvent progressEvent) {
-					System.out.println("Transferred bytes: " + progressEvent.getBytesTransferred());
+					LOGGER.info("Transferred bytes: " + progressEvent.getBytesTransferred());
 				}
 			});
 
@@ -82,6 +88,7 @@ public class S3FileOperationImpl implements S3FileOperation {
 
 			// Optionally, you can wait for the upload to finish before continuing.
 			upload.waitForCompletion();
+			flag = true;
 
 		} catch (IOException e) {
 			LOGGER.error("IOException: " + e.getMessage());
@@ -98,16 +105,17 @@ public class S3FileOperationImpl implements S3FileOperation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return flag;
 	}
 
 	@Override
-	public void deleteFile(String bucketName, String key) {
+	public void deleteFile(String key) {
 		LOGGER.info(" --- Deleting file from bucket --- ");
 		s3client.deleteObject(bucketName, key);
 	}
 
 	@Override
-	public byte[] getFile(String key, String bucketName) {
+	public byte[] downloadFile(String key) {
 		try {
 			if (s3client.doesBucketExistV2(bucketName)) {
 				LOGGER.info(" --- Downloading an file from bucket --- ");
@@ -151,15 +159,16 @@ public class S3FileOperationImpl implements S3FileOperation {
 	}
 
 	@Override
-	public void uploadFile(String bucketName, MultipartFile[] files) {
-		LOGGER.info(" --- Uploading a new files to S3 Bucket --- ");
-
+	public boolean uploadFile(MultipartFile[] files) {
+		LOGGER.info(" --- Uploading a new files to S3 Bucket --- "); 
+		boolean flag = false;
 		try {
 			for (MultipartFile file : files) {
 				String fileName = file.getOriginalFilename();
 				ObjectMetadata metadata = new ObjectMetadata();
 				metadata.setContentLength(file.getSize());
 				s3client.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
+				flag = true;
 			}
 		} catch (IOException e) {
 			LOGGER.error("IOException: " + e.getMessage());
@@ -170,12 +179,11 @@ public class S3FileOperationImpl implements S3FileOperation {
 			LOGGER.info("Error Type:       " + a.getErrorType());
 			LOGGER.info("Request ID:       " + a.getRequestId());
 		}
-
+		return flag;
 	}
 
 	@Override
-	public String downloadFile(String key, String bucketName) {
-
+	public String downloadFileURL(String key) {
 		try {
 			// Set the presigned URL to expire after one hour.
 			java.util.Date expiration = new java.util.Date();
