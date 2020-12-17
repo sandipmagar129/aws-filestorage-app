@@ -1,5 +1,7 @@
 package com.test.awsdemo.controller;
 
+import java.util.ArrayList;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +57,7 @@ public class ServiceController {
 	
 	@GetMapping("/sendemail")
 	public String sendEmail() {
-		String result = ens.sendEmail();
+		String result = ens.sendEmail(new ArrayList<String>(), new String(), new String());
 		JSONObject servicejson = new JSONObject();
 		servicejson.put("stats", result);
 		return servicejson.toString();

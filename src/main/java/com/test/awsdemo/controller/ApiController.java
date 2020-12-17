@@ -41,7 +41,7 @@ public class ApiController {
 		if (files.length == 0) {
 			response.put("msg", "Please select files to upload");
 		}
-		boolean status = fileOperation.uploadFile(files);		
+		boolean status = fileOperation.uploadFile(files, description);		
 		response.put("files", files);
 		response.put("status", status);	    
 		return new ResponseEntity<>(response, HttpStatus.OK);

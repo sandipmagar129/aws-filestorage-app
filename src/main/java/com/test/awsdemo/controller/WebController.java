@@ -49,7 +49,7 @@ public class WebController {
 			model.addAttribute("mymsg", "Please select files to upload");
 			return "redirect:/";
 		}
-		fileOperation.uploadFile(files);
+		fileOperation.uploadFile(files, description);
 		String fileName = "";
 		for (MultipartFile file : files) {
 			fileName += file.getOriginalFilename() + " ";

@@ -16,10 +16,10 @@ public interface S3FileOperation {
 //		
 	
 	public boolean uploadFile(String fileName, MultipartFile file);
-	public boolean uploadFile(MultipartFile[] file);
 	public void deleteFile(String fileName);
 	public byte[] downloadFile(String key);
 	public String downloadFileURL(String key);
 	public void copyFile(String srcBucket, String srcFileName,String destBucket,String destFileName);
+	boolean uploadFile(MultipartFile[] files, String docDescription);
 
 }

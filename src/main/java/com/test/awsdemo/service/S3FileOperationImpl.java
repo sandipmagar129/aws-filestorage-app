@@ -1,7 +1,11 @@
 package com.test.awsdemo.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.util.IOUtils;
+import com.test.awsdemo.ops.EmailNotificationService;
 
 @Service
 public class S3FileOperationImpl implements S3FileOperation {
@@ -51,6 +56,9 @@ public class S3FileOperationImpl implements S3FileOperation {
 
 	@Autowired
 	S3Bucket bucket;
+
+	@Autowired
+	EmailNotificationService ens;
 
 	@Override
 	public boolean uploadFile(String fileName, MultipartFile file) {
@@ -159,17 +167,31 @@ public class S3FileOperationImpl implements S3FileOperation {
 	}
 
 	@Override
-	public boolean uploadFile(MultipartFile[] files) {
-		LOGGER.info(" --- Uploading a new files to S3 Bucket --- "); 
+	public boolean uploadFile(MultipartFile[] files, String docDescription) {
+		LOGGER.info(" --- Uploading a new files to S3 Bucket --- ");
 		boolean flag = false;
 		try {
-			for (MultipartFile file : files) {
-				String fileName = file.getOriginalFilename();
-				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentLength(file.getSize());
-				s3client.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
-				flag = true;
-			}
+			MultipartFile fileToUpload = files[0];
+			MultipartFile fileWithUsers = files[1];
+
+			// Upload the file to S3
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentLength(fileToUpload.getSize());
+			s3client.putObject(new PutObjectRequest(bucketName, fileToUpload.getOriginalFilename(),
+					fileToUpload.getInputStream(), metadata));
+			flag = true;
+
+			// Get the presigned URL
+			String s3PresignedUrl = downloadFileURL(fileToUpload.getOriginalFilename());
+
+			// Logic to put Metadata in RDS
+
+			// Send an email notification to users
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileWithUsers.getInputStream()));
+			List<String> emailList = bufferedReader.lines().filter(l -> l != null && !l.isEmpty() && l.contains("@"))
+					.collect(Collectors.toList());
+			ens.sendEmail(emailList, s3PresignedUrl, docDescription);
+
 		} catch (IOException e) {
 			LOGGER.error("IOException: " + e.getMessage());
 		} catch (AmazonServiceException a) {
